@@ -21,10 +21,11 @@ function Home() {
 
     const {
         data: searchResult,
+        error,
         isLoading: resultsLoading,
         isError,
         refetch,
-    } = useQuery({
+    } = useQuery<SearchResult, Error>({
         queryKey: ["search", params],
         queryFn: async () => {
                 const data = await fetch(`${process.env.REACT_APP_SPOONACULAR_URL}/recipes/complexSearch`
@@ -136,7 +137,7 @@ function Home() {
         if(resultsLoading) return <></>
 
         return (searchResult?.results && searchResult?.results?.length) ? (
-            <ul className="grid grid-cols-1 mx-auto sm:grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-8">
+            <ul className="recipe-listing grid grid-cols-1 mx-auto sm:grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-8">
                 {
                     searchResult?.results.map((result: SearchResult["results"][0]) => (
                         <li className="block card max-w-80" key={result.id}>
@@ -174,17 +175,17 @@ function Home() {
                 <div className="absolute top-2/4 w-full h-full bg-[#33333385] translate-y-[-50%] flex justify-center items-center">
                     <div className="px-4 max-w-full">
                         <p className="text-3xl sm:text-4xl md:text-5xl text-center text-white font-medium mb-8">Find Your Favorite Recipe</p>
-                        <form className="w-full flex gap-x-2 sm:gap-x-4" onSubmit={formSubmit}>
+                        <form id="recipeSearch" className="w-full flex gap-x-2 sm:gap-x-4" onSubmit={formSubmit}>
                             <input 
                                 className="text-sm sm:text-base min-w-20 bg-white border border-gray-300 rounded-md py-2.5 px-3 flex-1"
                                 placeholder="Search for Recipe..."
-                                type="text" value={searchInput} onChange={(event) => setSearchInput(event.target.value)} 
+                                type="text" aria-label="recipe-input" value={searchInput} onChange={(event) => setSearchInput(event.target.value)} 
                             />
                             <button 
                                 className="
                                     text-sm sm:text-base font-semibold bg-[#db0c64] border border-[#db0c64] rounded-md py-1.5 px-4 sm:min-w-28 font-medium text-white
                                     transition hover:bg-[#b90a42] hover:border-[#b90a42]
-                                " 
+                                "
                                 type="submit">
                                 Search
                             </button>

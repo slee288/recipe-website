@@ -14,8 +14,8 @@ const Dropdown: FC<{
 }) => {
     return (
         <select className="
-            bg-gray-50 border border-gray-300 rounded-lg block py-1.5 sm:py-2.5 px-2.5 sm:px-3.5 sm:min-w-28
-        " name={name} value={value} onChange={onChange}>
+            bg-gray-50 disabled:bg-gray-300 border border-gray-300 rounded-lg block py-1.5 sm:py-2.5 px-2.5 sm:px-3.5 sm:min-w-28
+        " name={name} value={value} onChange={onChange} disabled={options.length <= 1}>
             {options.map((option) => (
                 <option value={option.value} key={option.key}>{option.label}</option>
             ))}

@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import './App.css';
 import Home from "./pages/Home";
 import RecipeDetail from "./pages/RecipeDetail";
-import ErrorPage from "./pages/ErrorPage";
+import ErrorPage from "./components/ErrorPage";
 
 const router = createBrowserRouter([
   {

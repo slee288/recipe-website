@@ -1,8 +1,8 @@
-import { useState, useEffect, ChangeEvent } from "react";
+import { useState, useEffect, ChangeEvent, SyntheticEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Dropdown from "../components/Dropdown";
-import { DropdownOption } from "../lib/types";
+import { DropdownOption, SearchResult } from "../lib/types";
 
 const cuisines = [
     "African", "Asian", "American", "British","Cajun","Caribbean","Chinese","Eastern European","European","French","German"
@@ -21,17 +21,27 @@ function Home() {
 
     const {
         data: searchResult,
+        isLoading: resultsLoading,
+        isError,
         refetch,
     } = useQuery({
         queryKey: ["search", params],
-        queryFn: () => fetch(`${process.env.REACT_APP_SPOONACULAR_URL}/recipes/complexSearch`
-                               + `?apiKey=${process.env.REACT_APP_SPOONACULAR_API_KEY}`
-                               + `&query=${params.search}`
-                               + `&number=5`
-                               + `&offset=${(params.page - 1) * 5}`
-                               + (params.cuisine && `&cuisine=${params.cuisine}`))
-                        .then(resp => resp.json()),
+        queryFn: async () => {
+                const data = await fetch(`${process.env.REACT_APP_SPOONACULAR_URL}/recipes/complexSearch`
+                                        + `?apiKey=${process.env.REACT_APP_SPOONACULAR_API_KEY}`
+                                        + `&query=${params.search}`
+                                        + `&number=5`
+                                        + `&offset=${(params.page - 1) * 5}`
+                                        + (params.cuisine && `&cuisine=${params.cuisine}`))
+                                    .then(resp => resp.json())
+
+                // error handling
+                if(data.status === "failure") throw data;
+
+                return data;
+            },
         enabled: false,
+        refetchOnWindowFocus: false   // this avoids unnecessary api calls when focus back to the window
     });
 
     // detect the changes for search parameters
@@ -50,7 +60,7 @@ function Home() {
     }, [params]);
 
     // only sets the search input parameter - resets the rest of the queries
-    function formSubmit(event: any) {
+    function formSubmit(event: SyntheticEvent) {
         event.preventDefault();
         setSearchParams(
             `search=${searchInput}`
@@ -122,6 +132,41 @@ function Home() {
         );
     }
 
+    function getResultsList() {
+        if(resultsLoading) return <></>
+
+        return (searchResult?.results && searchResult?.results?.length) ? (
+            <ul className="grid grid-cols-1 mx-auto sm:grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-8">
+                {
+                    searchResult?.results.map((result: SearchResult["results"][0]) => (
+                        <li className="block card max-w-80" key={result.id}>
+                            <a className="group w-full h-full inline-flex flex-col rounded-md shadow-md overflow-hidden transition-all hover:shadow-xl" href={`/recipes/${result.id}`}>
+                                <div className="w-full h-52 overflow-hidden">
+                                    <img className="w-full object-cover transition-all duration-500 group-hover:scale-110" src={result["image"]} alt={result["title"]} />
+                                </div>
+                                <div className="card-description py-4 px-6 flex flex-1 flex-col justify-between gap-y-8">
+                                    <p className="text-xl ml-1">{result["title"]}</p>
+                                    <button 
+                                        className="
+                                            rounded-full border border-[#db0c64] max-w-max px-6 py-1.5 text-[#db0c64] font-semibold transition
+                                            hover:bg-[#db0c64] hover:text-white
+                                        "
+                                    >
+                                        Recipe Details
+                                    </button>
+                                </div>
+                            </a>
+                        </li>
+                    ))
+                }
+            </ul>
+        ) : (
+            <div className="text-center">
+                <p className="text-xl sm:text-2xl">No Results to Display</p>
+            </div>
+        )
+    }
+
     return (
         <div className="w-full h-full">
             <div className="page-header relative">
@@ -154,37 +199,16 @@ function Home() {
                 <div className="flex gap-x-8 w-full max-w-5xl items-center justify-end">
                     {getCuisinesDropdown()}
                 </div>
-                <ul className="grid grid-cols-1 mx-auto sm:grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-8">
-                    {searchResult?.results.map((result: any) => (
-                        <li className="block card max-w-80" key={result.id}>
-                            <a className="group w-full inline-block rounded-md shadow-md overflow-hidden transition-all hover:shadow-xl" href={`/recipes/${result.id}`}>
-                                <div className="w-full h-52 overflow-hidden">
-                                    <img className="w-full object-cover transition-all duration-500 group-hover:scale-110" src={result["image"]} alt={result["title"]} />
-                                </div>
-                                <div className="card-description py-4 px-6 flex flex-col gap-y-8">
-                                    <p className="text-xl ml-1">{result["title"]}</p>
-                                    <button 
-                                        className="
-                                            rounded-full border border-[#db0c64] max-w-max px-6 py-1.5 text-[#db0c64] font-semibold transition
-                                            hover:bg-[#db0c64] hover:text-white
-                                        "
-                                    >
-                                        Recipe Details
-                                    </button>
-                                </div>
-                            </a>
-                        </li>
-                    ))}
-                </ul>
+                {getResultsList()}
                 {
-                    searchResult && (
+                    (searchResult && searchResult?.results?.length) ? (
                         <div className="flex flex-1 items-center justify-center">
                             <div className="flex gap-x-4 items-center">
                                 <p>Page: </p>
                                 {getPaginationDropdown()}
                             </div>
                         </div>
-                    )
+                    ) : <></>
                 }
                 
             </div>

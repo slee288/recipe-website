@@ -1,57 +1,40 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
-
-interface Recipe {
-    id: number;
-    title: string;
-    image: string;
-    extendedIngredients: {
-        id: number;
-        name: string;
-        image: string;
-        measures: {
-            metric: { amount: number; unitLong: string; unitShort: string; };
-            us: { amount: number; unitLong: string; unitShort: string; };
-        };
-    }[];
-    analyzedInstructions: {
-        steps?: {
-            step: string;
-        }[];
-    }[];
-    // dietary properties
-    cheap?: boolean;
-    dairyFree?: boolean;
-    glutenFree?: boolean;
-    ketogenic?: boolean;
-    lowFodmap?: boolean;
-    sustainable?: boolean;
-    vegan?: boolean;
-    vegetarian?: boolean;
-    veryHealthy?: boolean;
-    veryPopular?: boolean;
-    whole30?: boolean;
-}
+import { useParams, useNavigate } from "react-router-dom";
+import { Recipe } from "../lib/types";
+import ErrorPage from "../components/ErrorPage";
 
 function RecipeDetail() {
     const params = useParams();
+    const navigate = useNavigate();
     const recipeId = params?.id || "";
 
     const {
         data: recipeData,
+        error,
         isError,
         isLoading
-    } = useQuery<Recipe>({
+    } = useQuery<Recipe, Error>({
         queryKey: ["recipe"],
-        queryFn: () => fetch(`${process.env.REACT_APP_SPOONACULAR_URL}/recipes/${recipeId}/information?apiKey=${process.env.REACT_APP_SPOONACULAR_API_KEY}`)
-                            .then((resp) => resp.json()),
+        queryFn: async () => {
+            const data = await fetch(`${process.env.REACT_APP_SPOONACULAR_URL}/recipes/${recipeId}/information?apiKey=${process.env.REACT_APP_SPOONACULAR_API_KEY}`)
+                            .then((resp) => resp.json()).catch(err => {throw err});
+            
+            // error handling within the data 
+            if(data.status === "failure") throw data;
+
+            return data;
+        },
+        retry: 2,
+        refetchOnWindowFocus: false   // this avoids unnecessary api calls when focus back to the window
     });
 
+    // nothing displays while the data loads
     if(isLoading) return (
-        <div>
-            <h1 className="h6">...loading</h1>
-        </div>
+        <div></div>
     )
+
+    // display the error page when the data is not available
+    if(isError) return <ErrorPage />
 
     function displayDietaryTags(recipeData?: Recipe) {
         const dietaryPropertiesArray = [
@@ -70,17 +53,17 @@ function RecipeDetail() {
 
         return dietaryPropertiesArray.map(({ label, value }: { label: string; value: boolean; }) => {
             return value ? (
-                <span className="rounded-full text-xs sm:text-sm bg-[#fd4f64] text-white font-semibold py-1 px-4">
+                <span key={label} className="rounded-full text-xs sm:text-sm bg-[#fd4f64] text-white font-semibold py-1 px-4">
                     {label}
                 </span>
-            ) : (<></>)
+            ) : (<span key={label} className="hidden"></span>)
         })
     }
 
     function displayIngredients(recipeData?: Recipe) {
-        return recipeData?.extendedIngredients.map((ingredient: Recipe["extendedIngredients"][0]) => {
+        return recipeData?.extendedIngredients.map((ingredient: Recipe["extendedIngredients"][0], index: number) => {
             return (
-                <li key={ingredient.id} className="grid grid-cols-3 items-center gap-x-8 sm:gap-x-4">
+                <li key={`${ingredient.id}-${index}`} className="grid grid-cols-3 items-center gap-x-8 sm:gap-x-4">
                     <img 
                         className="inline-block col-span-1"
                         src={`${process.env.REACT_APP_SPOONACULAR_IMG_URL}/${ingredient.image}`} 
@@ -98,7 +81,10 @@ function RecipeDetail() {
 
     return (
         <div className="w-full h-full">
-            <div className="w-full max-w-5xl mx-auto mt-16 mb-8 px-4 sm:px-8 flex flex-col gap-y-8">
+            <div className="px-4 mt-8 max-w-6xl mx-auto">
+                <button className="rounded-lg border border-[#db0c64] px-2.5 py-1.1 text-[#db0c64]" onClick={() => navigate(-1)}>Go Back</button>
+            </div>
+            <div className="w-full max-w-5xl mx-auto mt-8 mb-8 px-4 sm:px-8 flex flex-col gap-y-8">
                 <div className="header">
                     <p className="text-2xl sm:text-3xl mb-2">{recipeData?.title}</p>
                     <div className="tags flex flex-wrap gap-x-2 gap-y-2 items-center">
@@ -114,14 +100,14 @@ function RecipeDetail() {
                         {displayIngredients(recipeData)}
                     </ul>
                 </div>
-                <div className="instructions">
+                {(recipeData?.analyzedInstructions && recipeData?.analyzedInstructions.length) ? <div className="instructions">
                     <p className="text-lg sm:text-xl mb-4">Cooking Instructions</p>
                     <ol className="list-decimal list-inside flex flex-col gap-y-6 bg-[#f2f2f2] rounded-xl px-6 sm:px-12 py-8">
                         {recipeData?.analyzedInstructions[0]?.steps?.map((instr: { step: string; }, index: number) => (
                             <li key={index}>{instr.step}</li>
                         ))}
                     </ol>
-                </div>
+                </div>: <></>}
             </div>
         </div>
     )

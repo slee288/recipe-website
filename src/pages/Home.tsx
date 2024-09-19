@@ -143,7 +143,10 @@ function Home() {
                         <li className="block card max-w-80" key={result.id}>
                             <a className="group w-full h-full inline-flex flex-col rounded-md shadow-md overflow-hidden transition-all hover:shadow-xl" href={`/recipes/${result.id}`}>
                                 <div className="w-full h-52 overflow-hidden">
-                                    <img className="w-full object-cover transition-all duration-500 group-hover:scale-110" src={result["image"]} alt={result["title"]} />
+                                    <img className="w-full object-cover transition-all duration-500 group-hover:scale-110" 
+                                        src={result["image"]} alt={result["title"]} 
+                                        onError={(evt: SyntheticEvent<HTMLImageElement, Event>) => { evt.currentTarget.src = "https://transpower.ca/wp-content/themes/consultix/images/no-image-found-360x250.png" }}
+                                    />
                                 </div>
                                 <div className="card-description py-4 px-6 flex flex-1 flex-col justify-between gap-y-8">
                                     <p className="text-xl ml-1">{result["title"]}</p>

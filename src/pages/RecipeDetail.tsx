@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 import { Recipe } from "../lib/types";
 import ErrorPage from "../components/ErrorPage";
+import { SyntheticEvent } from "react";
 
 function RecipeDetail() {
     const params = useParams();
@@ -68,6 +69,7 @@ function RecipeDetail() {
                         className="inline-block col-span-1"
                         src={`${process.env.REACT_APP_SPOONACULAR_IMG_URL}/${ingredient.image}`} 
                         alt={ingredient.name} 
+                        onError={(evt: SyntheticEvent<HTMLImageElement, Event>) => evt.currentTarget.src = "https://transpower.ca/wp-content/themes/consultix/images/no-image-found-360x250.png"}
                     />
                     <div className="flex flex-col col-span-2 gap-y-1 ingredient-details text-sm md:text-base">
                         <p>{ingredient.name}</p>
@@ -92,7 +94,9 @@ function RecipeDetail() {
                     </div>
                 </div>
                 <div className="w-full flex justify-center">
-                    <img className="block w-full sm:w-max sm:max-w-11/12 md:max-w-9/12" src={recipeData?.image} alt={recipeData?.title} />
+                    <img className="block w-full sm:w-max sm:max-w-11/12 md:max-w-9/12" src={recipeData?.image} alt={recipeData?.title} 
+                        onError={(evt: SyntheticEvent<HTMLImageElement, Event>) => evt.currentTarget.src = "https://transpower.ca/wp-content/themes/consultix/images/no-image-found-360x250.png"}
+                    />
                 </div>
                 <div className="ingredients">
                     <p className="text-lg sm:text-xl mb-4">Recipe Ingredients </p>

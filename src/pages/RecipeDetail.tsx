@@ -69,7 +69,7 @@ function RecipeDetail() {
                         src={`${process.env.REACT_APP_SPOONACULAR_IMG_URL}/${ingredient.image}`} 
                         alt={ingredient.name} 
                     />
-                    <div className="flex flex-col col-span-2 gap-y-1 ingredient-details col-span-3 text-sm md:text-base">
+                    <div className="flex flex-col col-span-2 gap-y-1 ingredient-details text-sm md:text-base">
                         <p>{ingredient.name}</p>
                         <p>metric: {ingredient.measures.metric?.amount} {ingredient.measures.metric?.unitShort}</p>
                         <p>us: {ingredient.measures.us?.amount} {ingredient.measures.us?.unitShort}</p>

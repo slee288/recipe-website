@@ -70,14 +70,6 @@ function Home() {
                 label: String(index + 1)
             }
         });
-        // const totalPagesArray: DropdownOption[] = [
-        //     { value: "1", key: "0", label: "1" },
-        //     { value: "2", key: "1", label: "2" },
-        //     { value: "3", key: "2", label: "3" },
-        //     { value: "4", key: "3", label: "4" },
-        //     { value: "5", key: "4", label: "5" },
-        //     { value: "6", key: "5", label: "6" }
-        // ]
 
         return (
             <Dropdown 
@@ -133,20 +125,20 @@ function Home() {
     return (
         <div className="w-full h-full">
             <div className="page-header relative">
-                <img className="object-cover h-128 w-full" src="https://spoonacular.com/application/frontend/images/wallpaper1.jpg" alt="spoonacular sample banner" />
+                <img className="object-cover h-96 md:h-120 w-full" src="https://spoonacular.com/application/frontend/images/wallpaper1.jpg" alt="spoonacular sample banner" />
                 <div className="absolute top-2/4 w-full h-full bg-[#33333385] translate-y-[-50%] flex justify-center items-center">
-                    <div className="">
-                        <p className="text-5xl text-white font-medium mb-8">Find Your Favorite Recipe</p>
-                        <form className="flex gap-x-4" onSubmit={formSubmit}>
+                    <div className="px-4 max-w-full">
+                        <p className="text-3xl sm:text-4xl md:text-5xl text-center text-white font-medium mb-8">Find Your Favorite Recipe</p>
+                        <form className="w-full flex gap-x-2 sm:gap-x-4" onSubmit={formSubmit}>
                             <input 
-                                className="text-base bg-white border border-gray-300 rounded-md py-2.5 px-3 flex-1"
+                                className="text-sm sm:text-base min-w-20 bg-white border border-gray-300 rounded-md py-2.5 px-3 flex-1"
                                 placeholder="Search for Recipe..."
                                 type="text" value={searchInput} onChange={(event) => setSearchInput(event.target.value)} 
                             />
                             <button 
                                 className="
-                                    text-base bg-[#ff787e] border border-[#ff787e] rounded-md py-1.5 px-9 font-medium text-white
-                                    transition hover:bg-[#cc454b]
+                                    text-sm sm:text-base font-semibold bg-[#db0c64] border border-[#db0c64] rounded-md py-1.5 px-4 sm:min-w-28 font-medium text-white
+                                    transition hover:bg-[#b90a42] hover:border-[#b90a42]
                                 " 
                                 type="submit">
                                 Search
@@ -158,21 +150,23 @@ function Home() {
             </div>
             
             
-            <div className="w-full max-w-5xl mx-auto mt-16 mb-8 flex flex-col gap-y-12">
+            <div className="w-full max-w-5xl mx-auto mt-16 mb-8 px-4 md:px-8 flex flex-col gap-y-12">
                 <div className="flex gap-x-8 w-full max-w-5xl items-center justify-end">
                     {getCuisinesDropdown()}
                 </div>
-                <ul className="grid grid-cols-3 gap-x-4 gap-y-8">
+                <ul className="grid grid-cols-1 mx-auto sm:grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-8">
                     {searchResult?.results.map((result: any) => (
-                        <li className="block card" key={result.id}>
-                            <a className="w-full inline-block rounded-md shadow-md overflow-hidden transition-all hover:shadow-xl" href={`/recipes/${result.id}`}>
-                                <img className="w-full h-52 object-cover" src={result["image"]} alt={result["title"]} />
+                        <li className="block card max-w-80" key={result.id}>
+                            <a className="group w-full inline-block rounded-md shadow-md overflow-hidden transition-all hover:shadow-xl" href={`/recipes/${result.id}`}>
+                                <div className="w-full h-52 overflow-hidden">
+                                    <img className="w-full object-cover transition-all duration-500 group-hover:scale-110" src={result["image"]} alt={result["title"]} />
+                                </div>
                                 <div className="card-description py-4 px-6 flex flex-col gap-y-8">
-                                    <p className="text-xl uppercase">{result["title"]}</p>
+                                    <p className="text-xl ml-1">{result["title"]}</p>
                                     <button 
                                         className="
-                                            rounded-full border border-[#ff787e] max-w-max px-8 py-3 text-[#ff787e] font-semibold transition
-                                            hover:bg-[#ff787e] hover:text-white
+                                            rounded-full border border-[#db0c64] max-w-max px-6 py-1.5 text-[#db0c64] font-semibold transition
+                                            hover:bg-[#db0c64] hover:text-white
                                         "
                                     >
                                         Recipe Details

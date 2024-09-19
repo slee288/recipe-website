@@ -1,6 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 
+interface Recipe {
+    id: number,
+    title: string,
+    image: string,
+    extendedIngredients: {
+        id: number,
+        name: string,
+        measures: {
+            metric: { amount: number, unitLong: string, unitShort: string },
+            us: { amount: number, unitLong: string, unitShort: string },
+        }
+    }[],
+    analyzedInstructions: {
+        steps?: {
+            step: string
+        }[]
+    }[]
+}
+
 function RecipeDetail() {
     const params = useParams();
     const recipeId = params?.id || "";
@@ -9,7 +28,7 @@ function RecipeDetail() {
         data: recipeData,
         isError,
         isLoading
-    } = useQuery({
+    } = useQuery<Recipe>({
         queryKey: ["recipe"],
         queryFn: () => fetch(`${process.env.REACT_APP_SPOONACULAR_URL}/recipes/${recipeId}/information?apiKey=${process.env.REACT_APP_SPOONACULAR_API_KEY}`)
                             .then((resp) => resp.json()),
@@ -22,16 +41,18 @@ function RecipeDetail() {
         </div>
     )
 
-    function displayIngredients(recipeData: any) {
-        return recipeData?.extendedIngredients.map((ingredient: any) => {
-            const measureKeys = Object.keys(ingredient["measures"]);
-            const name = ingredient["name"];
+    function displayIngredients(recipeData?: Recipe) {
+        return recipeData?.extendedIngredients.map((ingredient: Recipe["extendedIngredients"][0]) => {
+            const name = ingredient.name;
 
             return (
                 <>
                     <li>{name}</li>
                     <li>
-                        {measureKeys.map((key) => (`${key}: ${ingredient["measures"][key]["amount"]} ${ingredient["measures"][key]["unitShort"]}`))}
+                        metric: {ingredient.measures.metric?.amount} {ingredient.measures.metric?.unitShort}
+                    </li>
+                    <li>
+                        us: {ingredient.measures.us?.amount} {ingredient.measures.us?.unitShort}
                     </li>
                 </>
             )
@@ -40,7 +61,6 @@ function RecipeDetail() {
 
     return (
         <div>
-            <p className="h1">Bluecross Assessment - Recipe Details Page</p>
             <div>
                 <img src={recipeData?.image} />
                 <p className="h3">Name: {recipeData?.title}</p>
@@ -49,7 +69,7 @@ function RecipeDetail() {
                     {displayIngredients(recipeData)}
                 </ul>
                 <ol>
-                    {recipeData?.["analyzedInstructions"][0]["steps"].map((instr: any) => (
+                    {recipeData?.analyzedInstructions[0]?.steps?.map((instr: any) => (
                         <li>{instr.step}</li>
                     ))}
                 </ol>

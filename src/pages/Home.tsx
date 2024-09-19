@@ -199,10 +199,10 @@ function Home() {
             </div>
             
             
-            <div className="w-full max-w-5xl mx-auto mt-8 mb-8 px-4 md:px-8 flex flex-col gap-y-8">
-                <div className="flex flex-row-reverse gap-x-8 w-full max-w-5xl items-center justify-between">
+            <div className="w-full max-w-5xl mx-auto mt-8 mb-8 px-4 md:px-8 flex flex-col gap-y-4 sm:gap-y-8">
+                <div className="flex flex-col sm:flex-row-reverse gap-x-8 w-full max-w-5xl items-start sm:items-center justify-between">
                     {getCuisinesDropdown()}
-                    {params.search && <p className="text-lg">Search Results For: <span className="font-semibold">{params.search}</span></p>}
+                    {params.search && <p className="text-base sm:text-lg mt-2 sm:mt-0">Search Results For: <span className="font-semibold">{params.search}</span></p>}
                 </div>
                 {getResultsList()}
                 {
